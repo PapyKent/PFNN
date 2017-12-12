@@ -37,9 +37,11 @@ Xstd[w*1:w* 2] = Xstd[w*1:w* 2].mean() # Trajectory Future Positions
 Xstd[w*2:w* 3] = Xstd[w*2:w* 3].mean() # Trajectory Past Directions
 Xstd[w*3:w* 4] = Xstd[w*3:w* 4].mean() # Trajectory Future Directions
 Xstd[w*4:w*10] = Xstd[w*4:w*10].mean() # Trajectory Gait
+#mean injuries
 
 """ Mask Out Unused Joints in Input """
 
+#modify the weights, but how ?
 joint_weights = np.array([
     1,
     1e-10, 1, 1, 1, 1,
@@ -52,6 +54,7 @@ joint_weights = np.array([
 Xstd[w*10+j*3*0:w*10+j*3*1] = Xstd[w*10+j*3*0:w*10+j*3*1].mean() / (joint_weights * 0.1) # Pos
 Xstd[w*10+j*3*1:w*10+j*3*2] = Xstd[w*10+j*3*1:w*10+j*3*2].mean() / (joint_weights * 0.1) # Vel
 Xstd[w*10+j*3*2:          ] = Xstd[w*10+j*3*2:          ].mean() # Terrain
+#mean injuries .mean() / 0.1 -> related to joints + modify terrain?
 
 Ystd[0:2] = Ystd[0:2].mean() # Translational Velocity
 Ystd[2:3] = Ystd[2:3].mean() # Rotational Velocity

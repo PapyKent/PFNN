@@ -120,6 +120,7 @@ patches_coord = patches_database['C'].astype(np.float32)
 """ Processing Functions """
 
 def process_data(anim, phase, gait, type='flat'):
+    #add matrix as a param
     
     """ Do FK """
     global_xforms = Animation.transforms_global(anim)
@@ -197,6 +198,7 @@ def process_data(anim, phase, gait, type='flat'):
         
         Pc.append(phase[i])
         
+        #add injuries matrix .ravel()
         Xc.append(np.hstack([
                 rootposs[:,0].ravel(), rootposs[:,2].ravel(), # Trajectory Pos
                 rootdirs[:,0].ravel(), rootdirs[:,2].ravel(), # Trajectory Dir
@@ -472,7 +474,9 @@ for data in data_terrain:
     anim.offsets *= to_meters
     anim.positions *= to_meters
     anim = anim[::2]
-
+    #load injury files
+    #import function in injuries file generator
+    
     """ Load Phase / Gait """
     
     phase = np.loadtxt(data.replace('.bvh', '.phase'))[::2]
