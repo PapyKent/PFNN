@@ -12,6 +12,7 @@ from Quaternions import Quaternions
 from Pivots import Pivots
 from Learning import RBF
 
+
 """ Options """
 
 rng = np.random.RandomState(1234)
@@ -20,7 +21,10 @@ window = 60
 njoints = 31
 
 """ Data """
-
+data_injuries = [
+    './data/injuries/test_injuries', 
+    './data/injuries/test_injuries',       
+        ]
 data_terrain = [
     './data/animations/LocomotionFlat01_000.bvh',
     './data/animations/LocomotionFlat02_000.bvh',
@@ -109,6 +113,15 @@ data_terrain = [
     './data/animations/NewCaptures11_000_mirror.bvh',
 ]
 
+""" Extra function to import injuries data """     
+
+def import_injuries_data(files):
+    matrix =[]
+    for file in files:        
+        matrix.append(np.loadtxt(file))
+    return matrix;
+
+
 #data_terrain = ['./data/animations/LocomotionFlat01_000.bvh']
 
 """ Load Terrain Patches """
@@ -119,8 +132,7 @@ patches_coord = patches_database['C'].astype(np.float32)
 
 """ Processing Functions """
 
-def process_data(anim, phase, gait, type='flat'):
-    #add matrix as a param
+def process_data(anim, phase, gait, injuries, type='flat'):
     
     """ Do FK """
     global_xforms = Animation.transforms_global(anim)
@@ -198,7 +210,7 @@ def process_data(anim, phase, gait, type='flat'):
         
         Pc.append(phase[i])
         
-        #add injuries matrix .ravel()
+   
         Xc.append(np.hstack([
                 rootposs[:,0].ravel(), rootposs[:,2].ravel(), # Trajectory Pos
                 rootdirs[:,0].ravel(), rootdirs[:,2].ravel(), # Trajectory Dir
@@ -207,6 +219,7 @@ def process_data(anim, phase, gait, type='flat'):
                 rootgait[:,4].ravel(), rootgait[:,5].ravel(), 
                 local_positions[i-1].ravel(),  # Joint Pos
                 local_velocities[i-1].ravel(), # Joint Vel
+                injuries[i].ravel(), #Joints Link's status
                 ]))
         
         rootposs_next = root_rotation[i+1:i+2,0] * (global_positions[i+1:i+window+1:10,0] - global_positions[i+1:i+2,0])
@@ -474,9 +487,7 @@ for data in data_terrain:
     anim.offsets *= to_meters
     anim.positions *= to_meters
     anim = anim[::2]
-    #load injury files
-    #import function in injuries file generator
-    
+    injuries = import_injuries_data(data_injuries)
     """ Load Phase / Gait """
     
     phase = np.loadtxt(data.replace('.bvh', '.phase'))[::2]
@@ -495,7 +506,7 @@ for data in data_terrain:
 
     """ Preprocess Data """
     
-    Pc, Xc, Yc = process_data(anim, phase, gait, type=type)
+    Pc, Xc, Yc = process_data(anim, phase, gait, injuries, type=type)
 
     with open(data.replace('.bvh', '_footsteps.txt'), 'r') as f:
         footsteps = f.readlines()
