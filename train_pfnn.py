@@ -30,6 +30,7 @@ Xmean, Xstd = X.mean(axis=0), X.std(axis=0)
 Ymean, Ystd = Y.mean(axis=0), Y.std(axis=0)
 
 j = 31
+j2 = 55
 w = ((60*2)//10)
 
 Xstd[w*0:w* 1] = Xstd[w*0:w* 1].mean() # Trajectory Past Positions
@@ -38,11 +39,10 @@ Xstd[w*2:w* 3] = Xstd[w*2:w* 3].mean() # Trajectory Past Directions
 Xstd[w*3:w* 4] = Xstd[w*3:w* 4].mean() # Trajectory Future Directions
 Xstd[w*4:w*10] = Xstd[w*4:w*10].mean() # Trajectory Gait
 
-#mean injuries
 
 """ Mask Out Unused Joints in Input """
 
-
+#original pfnn bvh files
 joint_weights = np.array([
     1,
     1e-10, 1, 1, 1, 1,
@@ -52,7 +52,7 @@ joint_weights = np.array([
     1e-10, 1, 1, 1, 1e-10, 1e-10, 1e-10,
     1e-10, 1, 1, 1, 1e-10, 1e-10, 1e-10]).repeat(3)
 
-
+#mixamo converted files
 mixamo_joint_weights = np.array([
     1,
     1, 1, 1e-10,
@@ -64,8 +64,8 @@ mixamo_joint_weights = np.array([
 
 Xstd[w*10+j*3*0:w*10+j*3*1] = Xstd[w*10+j*3*0:w*10+j*3*1].mean() / (joint_weights * 0.1) # Pos
 Xstd[w*10+j*3*1:w*10+j*3*2] = Xstd[w*10+j*3*1:w*10+j*3*2].mean() / (joint_weights * 0.1) # Vel
-Xstd[w*10+j*3*2:w*10+j*3*3] = Xstd[w*10+j*3*2:w*10+j*3*3].mean() / (mixamo_joint_weights * 0.1) # Inj
-Xstd[w*10+j*3*3:          ] = Xstd[w*10+j*3*3:          ].mean() # Terrain
+Xstd[w*10+j*3*2:w*10+j*3*2+j2] = Xstd[w*10+j*3*2:w*10+j*3*2+j2*3].mean() / (mixamo_joint_weights * 0.1) # Inj
+Xstd[w*10+j*3*2+j2*3:          ] = Xstd[w*10+j*3*2+j2*3:          ].mean() # Terrain
 
 
 Ystd[0:2] = Ystd[0:2].mean() # Translational Velocity

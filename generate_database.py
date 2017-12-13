@@ -19,6 +19,7 @@ rng = np.random.RandomState(1234)
 to_meters = 5.6444
 window = 60
 njoints = 31
+njoints_mixamo = 55
 
 """ Data """
 data_injuries = [
@@ -538,7 +539,7 @@ for data in data_terrain:
             
             """ Reduce Heights in Input/Output to Match"""
             
-            xo_s, xo_e = ((window*2)//10)*10+1, ((window*2)//10)*10+njoints*3+1
+            xo_s, xo_e = ((window*2)//10)*10+1, ((window*2)//10)*10+njoints*3+njoints_mixamo*3+1
             yo_s, yo_e = 8+(window//10)*4+1, 8+(window//10)*4+njoints*3+1
             Xh[:,xo_s:xo_e:3] -= hmean[...,np.newaxis]
             Yh[:,yo_s:yo_e:3] -= hmean[...,np.newaxis]
