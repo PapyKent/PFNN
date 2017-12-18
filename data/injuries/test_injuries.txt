@@ -1,3 +1,0 @@
-frames:20
-0-5 LeftShoulder-LeftArm[7];
-10-15 LeftShoulder-LeftArm[5];Hips-LHipJoint[10];
