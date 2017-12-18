@@ -18,15 +18,40 @@ from Learning import RBF
 rng = np.random.RandomState(1234)
 to_meters = 5.6444
 window = 60
+
 njoints = 31
 njoints_mixamo = 55
 
 """ Data """
 data_injuries = [
-    './data/injuries/test_injuries', 
-    './data/injuries/test_injuries',       
+    './data/injuries/Injured_Jog_LLA_extended_injuries', 
+    './data/injuries/Injured_Jog_RLA_extended_injuries', 
+    './data/injuries/Injured_Run_LLL_extended_injuries', 
+    './data/injuries/Injured_Run_RLL_extended_injuries', 
+    './data/injuries/Injured_Walk_LLL_extended_injuries', 
+    './data/injuries/Injured_Walk_LUA_extended_injuries', 
+    './data/injuries/Injured_Walk_LUL_extended_injuries', 
+    './data/injuries/Injured_Walk_RLL_extended_injuries', 
+    './data/injuries/Injured_Walk_RUA_extended_injuries',
+    './data/injuries/Injured_Walk_RUL_extended_injuries',        
         ]
+
+
 data_terrain = [
+    './data/injuries/Injured_Jog_LLA_extended.bvh', 
+    './data/injuries/Injured_Jog_RLA_extended.bvh', 
+    './data/injuries/Injured_Run_LLL_extended.bvh', 
+    './data/injuries/Injured_Run_RLL_extended.bvh', 
+    './data/injuries/Injured_Walk_LLL_extended.bvh', 
+    './data/injuries/Injured_Walk_LUA_extended.bvh', 
+    './data/injuries/Injured_Walk_LUL_extended.bvh', 
+    './data/injuries/Injured_Walk_RLL_extended.bvh', 
+    './data/injuries/Injured_Walk_RUA_extended.bvh',
+    './data/injuries/Injured_Walk_RUL_extended.bvh',    
+        ]
+
+
+"""data_terrain = [
     './data/animations/LocomotionFlat01_000.bvh',
     './data/animations/LocomotionFlat02_000.bvh',
     './data/animations/LocomotionFlat02_001.bvh',
@@ -112,15 +137,8 @@ data_terrain = [
     './data/animations/NewCaptures09_000_mirror.bvh',
     './data/animations/NewCaptures10_000_mirror.bvh',
     './data/animations/NewCaptures11_000_mirror.bvh',
-]
+]"""
 
-""" Extra function to import injuries data """     
-
-def import_injuries_data(files):
-    matrix =[]
-    for file in files:        
-        matrix.append(np.loadtxt(file))
-    return matrix;
 
 
 #data_terrain = ['./data/animations/LocomotionFlat01_000.bvh']
@@ -200,7 +218,6 @@ def process_data(anim, phase, gait, injuries, type='flat'):
         gait[-1,3] = gait[-2,3]
 
     """ Start Windows """
-    
     Pc, Xc, Yc = [], [], []
     
     for i in range(window, len(anim)-window-1, 1):
@@ -209,9 +226,8 @@ def process_data(anim, phase, gait, injuries, type='flat'):
         rootdirs = root_rotation[i:i+1,0] * forward[i-window:i+window:10]    
         rootgait = gait[i-window:i+window:10]
         
-        Pc.append(phase[i])
+        Pc.append(phase[i])        
         
-   
         Xc.append(np.hstack([
                 rootposs[:,0].ravel(), rootposs[:,2].ravel(), # Trajectory Pos
                 rootdirs[:,0].ravel(), rootdirs[:,2].ravel(), # Trajectory Dir
@@ -220,7 +236,7 @@ def process_data(anim, phase, gait, injuries, type='flat'):
                 rootgait[:,4].ravel(), rootgait[:,5].ravel(), 
                 local_positions[i-1].ravel(),  # Joint Pos
                 local_velocities[i-1].ravel(), # Joint Vel
-                injuries[i].ravel(), #Joints Link's status
+                injuries[i-1].ravel(), #Joints Link's status
                 ]))
         
         rootposs_next = root_rotation[i+1:i+2,0] * (global_positions[i+1:i+window+1:10,0] - global_positions[i+1:i+2,0])
@@ -469,6 +485,7 @@ for data in data_terrain:
     """ Data Types """
     
     if   'LocomotionFlat12_000' in data: type = 'jumpy'
+    elif 'Injured'    in data: type = 'jumpy'
     elif 'NewCaptures01_000'    in data: type = 'flat'
     elif 'NewCaptures02_000'    in data: type = 'flat'
     elif 'NewCaptures03_000'    in data: type = 'jumpy'
@@ -488,7 +505,8 @@ for data in data_terrain:
     anim.offsets *= to_meters
     anim.positions *= to_meters
     anim = anim[::2]
-    injuries = import_injuries_data(data_injuries)
+    injuries = np.loadtxt(data.replace('.bvh', '_injuries'))
+
     """ Load Phase / Gait """
     
     phase = np.loadtxt(data.replace('.bvh', '.phase'))[::2]
@@ -533,14 +551,15 @@ for data in data_terrain:
             int(curr[0])//2-window:
             int(next[0])//2+window+1], type=type)
 
+    
         for h, hmean in zip(H, Hmean):
             
             Xh, Yh = Xc[slc].copy(), Yc[slc].copy()
-            
+
             """ Reduce Heights in Input/Output to Match"""
             
-            xo_s, xo_e = ((window*2)//10)*10+1, ((window*2)//10)*10+njoints*3+njoints_mixamo*3+1
-            yo_s, yo_e = 8+(window//10)*4+1, 8+(window//10)*4+njoints*3+1
+            xo_s, xo_e = ((window*2)//10)*10+1, ((window*2)//10)*10+njoints_mixamo*3+1
+            yo_s, yo_e = 8+(window//10)*4+1, 8+(window//10)*4+njoints_mixamo*3+1
             Xh[:,xo_s:xo_e:3] -= hmean[...,np.newaxis]
             Yh[:,yo_s:yo_e:3] -= hmean[...,np.newaxis]
             Xh = np.concatenate([Xh, h - hmean[...,np.newaxis]], axis=-1)
