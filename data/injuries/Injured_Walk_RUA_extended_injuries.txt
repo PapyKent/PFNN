@@ -1,0 +1,2 @@
+frames:610
+0-610 RightArm-RightForeArm[10];
