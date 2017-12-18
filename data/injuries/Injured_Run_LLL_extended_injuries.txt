@@ -1,0 +1,2 @@
+frames:380
+0-390 LeftLeg-LeftFoot[10];
