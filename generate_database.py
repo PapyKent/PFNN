@@ -287,14 +287,22 @@ def process_heights(anim, nsamples=10, type='flat'):
     global_positions = global_xforms[:,:,:3,3] / global_xforms[:,:,3:,3]
     global_rotations = Quaternions.from_transforms(global_xforms)
     
+
     """ Extract Forward Direction """
     
-    sdr_l, sdr_r, hip_l, hip_r = 18, 25, 2, 7
+    #original pfnn bvh hierarchy
+    #sdr_l, sdr_r, hip_l, hip_r = 18, 25, 2, 7
+    
+    #for mixamo bvh hierarchy
+    sdr_l, sdr_r, hip_l, hip_r = 10, 29, 52, 48
+    
+    
     across = (
         (global_positions[:,sdr_l] - global_positions[:,sdr_r]) + 
         (global_positions[:,hip_l] - global_positions[:,hip_r]))
     across = across / np.sqrt((across**2).sum(axis=-1))[...,np.newaxis]
     
+
     """ Smooth Forward Direction """
     
     direction_filterwidth = 20
@@ -306,25 +314,36 @@ def process_heights(anim, nsamples=10, type='flat'):
         np.array([[0,0,1]]).repeat(len(forward), axis=0))[:,np.newaxis] 
 
     """ Foot Contacts """
+    #original pfnn bvh hierarchy
+    #fid_l, fid_r = np.array([4,5]), np.array([9,10])
     
-    fid_l, fid_r = np.array([4,5]), np.array([9,10])
+    #for mixamo bvh hierarchy    
+    fid_l, fid_r = np.array([53,54]), np.array([49,50])
+    
+    
     velfactor = np.array([0.02, 0.02])
     
     feet_l_x = (global_positions[1:,fid_l,0] - global_positions[:-1,fid_l,0])**2
     feet_l_y = (global_positions[1:,fid_l,1] - global_positions[:-1,fid_l,1])**2
     feet_l_z = (global_positions[1:,fid_l,2] - global_positions[:-1,fid_l,2])**2
     feet_l = (((feet_l_x + feet_l_y + feet_l_z) < velfactor))
+   
     
     feet_r_x = (global_positions[1:,fid_r,0] - global_positions[:-1,fid_r,0])**2
     feet_r_y = (global_positions[1:,fid_r,1] - global_positions[:-1,fid_r,1])**2
     feet_r_z = (global_positions[1:,fid_r,2] - global_positions[:-1,fid_r,2])**2
     feet_r = (((feet_r_x + feet_r_y + feet_r_z) < velfactor))
     
+    
+    
     feet_l = np.concatenate([feet_l, feet_l[-1:]], axis=0)
     feet_r = np.concatenate([feet_r, feet_r[-1:]], axis=0)
     
-    """ Toe and Heel Heights """
     
+    """ Toe and Heel Heights """
+    #for mixamo bvh hierarchy
+    # ?
+    #original pfnn bvh hierarchy
     toe_h, heel_h = 4.0, 5.0
     
     """ Foot Down Positions """
@@ -469,8 +488,10 @@ def process_heights(anim, nsamples=10, type='flat'):
                 root_heights_l[:,i-window:i+window:10]], axis=1))
         root_averages.append(root_heights_c[:,i-window:i+window:10].mean(axis=1))
      
+        
     root_terrains = np.swapaxes(np.array(root_terrains), 0, 1)
     root_averages = np.swapaxes(np.array(root_averages), 0, 1)
+    
     
     return root_terrains, root_averages
 
@@ -505,15 +526,16 @@ for data in data_terrain:
     anim.offsets *= to_meters
     anim.positions *= to_meters
     anim = anim[::2]
-    injuries = np.loadtxt(data.replace('.bvh', '_injuries'))
-
-    """ Load Phase / Gait """
     
+
+    """ Load Phase / Gait / Injuries"""
+    
+    injuries = np.loadtxt(data.replace('.bvh', '_injuries'))
     phase = np.loadtxt(data.replace('.bvh', '.phase'))[::2]
     gait = np.loadtxt(data.replace('.bvh', '.gait'))[::2]
 
     """ Merge Jog / Run and Crouch / Crawl """
-    
+     
     gait = np.concatenate([
         gait[:,0:1],
         gait[:,1:2],
@@ -527,6 +549,7 @@ for data in data_terrain:
     
     Pc, Xc, Yc = process_data(anim, phase, gait, injuries, type=type)
 
+    
     with open(data.replace('.bvh', '_footsteps.txt'), 'r') as f:
         footsteps = f.readlines()
     
@@ -550,12 +573,11 @@ for data in data_terrain:
         H, Hmean = process_heights(anim[
             int(curr[0])//2-window:
             int(next[0])//2+window+1], type=type)
-
-    
+        
         for h, hmean in zip(H, Hmean):
             
             Xh, Yh = Xc[slc].copy(), Yc[slc].copy()
-
+            
             """ Reduce Heights in Input/Output to Match"""
             
             xo_s, xo_e = ((window*2)//10)*10+1, ((window*2)//10)*10+njoints_mixamo*3+1
