@@ -159,8 +159,12 @@ def process_data(anim, phase, gait, injuries, type='flat'):
     global_rotations = Quaternions.from_transforms(global_xforms)
     
     """ Extract Forward Direction """
+    #original pfnn bvh hierarchy
+    #sdr_l, sdr_r, hip_l, hip_r = 18, 25, 2, 7
     
-    sdr_l, sdr_r, hip_l, hip_r = 18, 25, 2, 7
+    #for mixamo bvh hierarchy
+    sdr_l, sdr_r, hip_l, hip_r = 10, 29, 52, 48
+    
     across = (
         (global_positions[:,sdr_l] - global_positions[:,sdr_r]) + 
         (global_positions[:,hip_l] - global_positions[:,hip_r]))
@@ -191,7 +195,11 @@ def process_data(anim, phase, gait, injuries, type='flat'):
     
     """ Foot Contacts """
     
-    fid_l, fid_r = np.array([4,5]), np.array([9,10])
+    #original pfnn bvh hierarchy
+    #fid_l, fid_r = np.array([4,5]), np.array([9,10])
+    #mixamo bvh
+    fid_l, fid_r = np.array([53,54]), np.array([49,50])
+    
     velfactor = np.array([0.02, 0.02])
     
     feet_l_x = (global_positions[1:,fid_l,0] - global_positions[:-1,fid_l,0])**2
@@ -216,9 +224,10 @@ def process_data(anim, phase, gait, injuries, type='flat'):
         head = 16
         gait[:-1,3] = 1 - np.clip((global_positions[:-1,head,1] - 80) / (130 - 80), 0, 1)
         gait[-1,3] = gait[-2,3]
-
+    
     """ Start Windows """
     Pc, Xc, Yc = [], [], []
+
     
     for i in range(window, len(anim)-window-1, 1):
         
@@ -226,8 +235,9 @@ def process_data(anim, phase, gait, injuries, type='flat'):
         rootdirs = root_rotation[i:i+1,0] * forward[i-window:i+window:10]    
         rootgait = gait[i-window:i+window:10]
         
+   
         Pc.append(phase[i])        
-        
+
         Xc.append(np.hstack([
                 rootposs[:,0].ravel(), rootposs[:,2].ravel(), # Trajectory Pos
                 rootdirs[:,0].ravel(), rootdirs[:,2].ravel(), # Trajectory Dir
@@ -236,8 +246,11 @@ def process_data(anim, phase, gait, injuries, type='flat'):
                 rootgait[:,4].ravel(), rootgait[:,5].ravel(), 
                 local_positions[i-1].ravel(),  # Joint Pos
                 local_velocities[i-1].ravel(), # Joint Vel
-                injuries[i-1].ravel(), #Joints Link's status
+                injuries[i-1].ravel() #Joints Link's status
                 ]))
+    
+        
+       
         
         rootposs_next = root_rotation[i+1:i+2,0] * (global_positions[i+1:i+window+1:10,0] - global_positions[i+1:i+2,0])
         rootdirs_next = root_rotation[i+1:i+2,0] * forward[i+1:i+window+1:10]   
@@ -254,7 +267,8 @@ def process_data(anim, phase, gait, injuries, type='flat'):
                 local_velocities[i].ravel(), # Joint Vel
                 local_rotations[i].ravel()   # Joint Rot
                 ]))
-                                                
+
+                         
     return np.array(Pc), np.array(Xc), np.array(Yc)
     
 
@@ -527,7 +541,7 @@ for data in data_terrain:
     anim.positions *= to_meters
     anim = anim[::2]
     
-
+    
     """ Load Phase / Gait / Injuries"""
     
     injuries = np.loadtxt(data.replace('.bvh', '_injuries'))
@@ -556,7 +570,7 @@ for data in data_terrain:
     """ For each Locomotion Cycle fit Terrains """
     
     for li in range(len(footsteps)-1):
-    
+       
         curr, next = footsteps[li+0].split(' '), footsteps[li+1].split(' ')
         
         """ Ignore Cycles marked with '*' or not in range """
