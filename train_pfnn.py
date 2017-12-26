@@ -62,10 +62,11 @@ mixamo_joint_weights = np.array([
     1, 1, 1, 1,
     1, 1, 1, 1]).repeat(3)
 
+
 Xstd[w*10+j2*3*0:w*10+j2*3*1] = Xstd[w*10+j2*3*0:w*10+j2*3*1].mean() / (mixamo_joint_weights * 0.1) # Pos
 Xstd[w*10+j2*3*1:w*10+j2*3*2] = Xstd[w*10+j2*3*1:w*10+j2*3*2].mean() / (mixamo_joint_weights * 0.1) # Vel
-Xstd[w*10+j2*3*2:w*10+j2*3*2+j2] = Xstd[w*10+j2*3*2:w*10+j2*3*2+j2].mean() / (mixamo_joint_weights * 0.1) # Inj
-Xstd[w*10+j2*3*2+j2:          ] = Xstd[w*10+j2*3*2+j2:          ].mean() # Terrain
+Xstd[w*10+j2*3*2:w*10+j2*3*2+j-1] = Xstd[w*10+j2*3*2:w*10+j2*3*2+j-1].mean() #/ (joint_weights * 0.1) # Inj
+Xstd[w*10+j2*3*2+j-1:          ] = Xstd[w*10+j2*3*3+j-1:          ].mean() # Terrain
 
 
 Ystd[0:2] = Ystd[0:2].mean() # Translational Velocity

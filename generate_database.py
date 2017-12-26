@@ -268,7 +268,7 @@ def process_data(anim, phase, gait, injuries, type='flat'):
                 local_rotations[i].ravel()   # Joint Rot
                 ]))
 
-                         
+                    
     return np.array(Pc), np.array(Xc), np.array(Yc)
     
 
@@ -563,6 +563,7 @@ for data in data_terrain:
     
     Pc, Xc, Yc = process_data(anim, phase, gait, injuries, type=type)
 
+ 
     
     with open(data.replace('.bvh', '_footsteps.txt'), 'r') as f:
         footsteps = f.readlines()
@@ -591,21 +592,22 @@ for data in data_terrain:
         for h, hmean in zip(H, Hmean):
             
             Xh, Yh = Xc[slc].copy(), Yc[slc].copy()
-            
+           
             """ Reduce Heights in Input/Output to Match"""
             
             xo_s, xo_e = ((window*2)//10)*10+1, ((window*2)//10)*10+njoints_mixamo*3+1
             yo_s, yo_e = 8+(window//10)*4+1, 8+(window//10)*4+njoints_mixamo*3+1
             Xh[:,xo_s:xo_e:3] -= hmean[...,np.newaxis]
-            Yh[:,yo_s:yo_e:3] -= hmean[...,np.newaxis]
-            Xh = np.concatenate([Xh, h - hmean[...,np.newaxis]], axis=-1)
+            Yh[:,yo_s:yo_e:3] -= hmean[...,np.newaxis]         
             
+            Xh = np.concatenate([Xh, h - hmean[...,np.newaxis]], axis=-1)
+
             """ Append to Data """
             
             P.append(np.hstack([0.0, Pc[slc][1:-1], 1.0]).astype(np.float32))
             X.append(Xh.astype(np.float32))
             Y.append(Yh.astype(np.float32))
-  
+          
 """ Clip Statistics """
   
 print('Total Clips: %i' % len(X))
@@ -626,4 +628,3 @@ print(Xun.shape, Yun.shape, Pun.shape)
 print('Saving Database...')
 
 np.savez_compressed('database.npz', Xun=Xun, Yun=Yun, Pun=Pun)
-
