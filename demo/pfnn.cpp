@@ -60,6 +60,8 @@ struct Options {
   bool display_hud_options;
   bool display_hud_stick;
   bool display_hud_speed;
+
+  bool display_hud_injuries;
   
   bool display_areas_jump;
   bool display_areas_walls;
@@ -105,7 +107,8 @@ static Options* options = NULL;
 
 struct PFNN {
   
-  enum { XDIM = 342, YDIM = 311, HDIM = 512 };
+  //old pfnn enum { XDIM = 342, YDIM = 311, HDIM = 512 };
+  enum { XDIM = 516, YDIM = 527, HDIM = 512 };
   enum { MODE_CONSTANT, MODE_LINEAR, MODE_CUBIC };
 
   int mode;
@@ -729,7 +732,11 @@ static Shader* shader_character_shadow = NULL;
 
 struct Character {
   
-  enum { JOINT_NUM = 31 };
+  //old pfnn bvh hierarchy 
+  //enum { JOINT_NUM = 31 };
+
+  enum { INJ_LINKS_NUM = 30 };
+  enum { JOINT_NUM = 55 };
   
   GLuint vbo, tbo;
   int ntri, nvtx;
@@ -739,6 +746,8 @@ struct Character {
   float crouched_amount;
   float crouched_target;
   float responsive;
+
+  float injury_amount;
   
   glm::vec3 joint_positions[JOINT_NUM];
   glm::vec3 joint_velocities[JOINT_NUM];
@@ -751,7 +760,10 @@ struct Character {
   glm::mat4 joint_global_anim_xform[JOINT_NUM];
 
   int joint_parents[JOINT_NUM];
+
+  int joint_links_status[INJ_LINKS_NUM];
   
+  /* old pfnn bvh hierarchy
   enum {
     JOINT_ROOT_L = 1,
     JOINT_HIP_L  = 2,
@@ -764,8 +776,24 @@ struct Character {
     JOINT_KNEE_R = 8,  
     JOINT_HEEL_R = 9,
     JOINT_TOE_R  = 10  
-  };
+  };*/
   
+
+  enum {
+   
+    JOINT_HIP_L  = 52,
+    JOINT_KNEE_L = 53,  
+    JOINT_HEEL_L = 54,
+    JOINT_TOE_L  = 55,  
+      
+   
+    JOINT_HIP_R  = 48,  
+    JOINT_KNEE_R = 49,  
+    JOINT_HEEL_R = 50,
+    JOINT_TOE_R  = 51  
+  };
+
+
   Character()
     : vbo(0)
     , tbo(0)
@@ -1065,6 +1093,10 @@ static void reset(glm::vec2 position) {
     character->joint_positions[i]  = pos;
     character->joint_velocities[i] = vel;
     character->joint_rotations[i]  = rot;
+  }
+  
+  for (int i = 0; i < Character::INJ_LINKS_NUM; i++) {
+    character->joint_links_status[i] = 0;
   }
   
   character->phase = 0.0;
@@ -1646,9 +1678,17 @@ static void pre_render() {
     pfnn->Xp(o+(Character::JOINT_NUM*3*1)+i*3+2) = prv.z;
   }
     
-  /* Input Trajectory Heights */
+
+  /*Injuries status   TODO*/
+   for(int i = 0; i < Character::INJ_LINKS_NUM; i++){
+    int o = (((Trajectory::LENGTH)/10)*10);  
+    pfnn->Xp(o+(Character::JOINT_NUM*3*2)+i) = joint_links_status[i];
+   } 
+
+  
+  /* Input Trajectory Heights TODO*/
   for (int i = 0; i < Trajectory::LENGTH; i += 10) {
-    int o = (((Trajectory::LENGTH)/10)*10)+Character::JOINT_NUM*3*2;
+    int o = (((Trajectory::LENGTH)/10)*10)+Character::JOINT_NUM*3*2+INJ_LINKS_NUM;
     int w = (Trajectory::LENGTH)/10;
     glm::vec3 position_r = trajectory->positions[i] + (trajectory->rotations[i] * glm::vec3( trajectory->width, 0, 0));
     glm::vec3 position_l = trajectory->positions[i] + (trajectory->rotations[i] * glm::vec3(-trajectory->width, 0, 0));
@@ -1656,7 +1696,9 @@ static void pre_render() {
     pfnn->Xp(o+(w*1)+(i/10)) = trajectory->positions[i].y - root_position.y;
     pfnn->Xp(o+(w*2)+(i/10)) = heightmap->sample(glm::vec2(position_l.x, position_l.z)) - root_position.y;
   }
-    
+
+
+  
   /* Perform Regression */
   
   clock_t time_start = clock();
@@ -1763,7 +1805,7 @@ static void pre_render() {
       glm::vec3 heel_r = glm::vec3(character->joint_global_anim_xform[Character::JOINT_HEEL_R][3]);
 
       ik->two_joint(hip_l, knee_l, heel_l, key_hl, 1.0,
-        character->joint_global_anim_xform[Character::JOINT_ROOT_L],
+        //character->joint_global_anim_xform[Character::JOINT_ROOT_L],
         character->joint_global_anim_xform[Character::JOINT_HIP_L],
         character->joint_global_anim_xform[Character::JOINT_HIP_L],
         character->joint_global_anim_xform[Character::JOINT_KNEE_L],
@@ -1771,7 +1813,7 @@ static void pre_render() {
         character->joint_anim_xform[Character::JOINT_KNEE_L]);
       
       ik->two_joint(hip_r, knee_r, heel_r, key_hr, 1.0, 
-        character->joint_global_anim_xform[Character::JOINT_ROOT_R],
+        //character->joint_global_anim_xform[Character::JOINT_ROOT_R],
         character->joint_global_anim_xform[Character::JOINT_HIP_R],
         character->joint_global_anim_xform[Character::JOINT_HIP_R],
         character->joint_global_anim_xform[Character::JOINT_KNEE_R],
@@ -2590,6 +2632,14 @@ void render() {
 }
 
 
+void injureCharacterBody(int index){
+  joint_links_status[i]+= 1;
+
+  if(joint_links_status[i] >= 10)
+    joint_links_status[i] = 0;
+}
+
+
 int main(int argc, char **argv) {
   
   /* Init SDL */
@@ -2702,6 +2752,41 @@ int main(int argc, char **argv) {
           case SDLK_4: load_world3(); break;
           case SDLK_5: load_world4(); break;
           case SDLK_6: load_world5(); break;
+
+          case SDLK_a: injureCharacterBody(0); break; //Hips-LHipJoint
+          case SDLK_z: injureCharacterBody(1); break; //LHipJoint-LeftUpLeg
+          case SDLK_e: injureCharacterBody(2); break; //LeftUpLeg-LeftLeg
+          case SDLK_r: injureCharacterBody(3); break; //LeftLeg-LeftFoot
+          case SDLK_t: injureCharacterBody(4); break; //LeftFoot-LeftToeBase
+
+          case SDLK_y: injureCharacterBody(5); break; //Hips-RHipJoint
+          case SDLK_u: injureCharacterBody(6); break; //RHipJoint-RightUpLeg
+          case SDLK_i: injureCharacterBody(7); break; //RightUpLeg-RightLeg
+          case SDLK_o: injureCharacterBody(8); break; //RightLeg-RightFoot
+          case SDLK_p: injureCharacterBody(9); break; //RightFoot-RightToeBase
+
+          //case SDLK_a: injureCharacterBody(10); break; //Hips-LowerBack
+          //case SDLK_a: injureCharacterBody(11); break; //LowerBack-Spine
+          //case SDLK_a: injureCharacterBody(12); break; //Spine-Spine1
+          //case SDLK_a: injureCharacterBody(13); break; //Spine1-Neck
+          //case SDLK_a: injureCharacterBody(14); break; //Neck-Neck1
+          //case SDLK_a: injureCharacterBody(15); break; //Neck1-Head
+
+          case SDLK_q: injureCharacterBody(16); break; //Spine1-LeftShoulder
+          case SDLK_s: injureCharacterBody(17); break; //LeftShoulder-LeftArm
+          case SDLK_d: injureCharacterBody(18); break; //LeftArm-LeftForeArm
+          case SDLK_f: injureCharacterBody(19); break; //LeftForeArm-LeftHand
+          case SDLK_g: injureCharacterBody(20); break; //LeftHand-LeftFingerBase
+          case SDLK_h: injureCharacterBody(21); break; //LeftFingerBase-LeftHandIndex1
+          case SDLK_j: injureCharacterBody(22); break; //LeftHand-LThumb
+
+          case SDLK_k: injureCharacterBody(23); break; //Spine1-RightShoulder
+          case SDLK_l: injureCharacterBody(24); break; //RightShoulder-RightArm
+          case SDLK_m: injureCharacterBody(25); break; //RightArm-RightForeArm
+          case SDLK_w: injureCharacterBody(26); break; //RightForeArm-RightHand
+          case SDLK_x: injureCharacterBody(27); break; //RightHand-RightFingerBase
+          case SDLK_c: injureCharacterBody(28); break; //RightFingerBase-RightHandIndex1
+          case SDLK_v: injureCharacterBody(29); break; //RightHand-RThumb
         }
         
       }
