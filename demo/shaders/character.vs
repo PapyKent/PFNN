@@ -3,7 +3,7 @@
 uniform mat4 view;
 uniform mat4 proj;
 
-uniform mat4 joints[31];
+uniform mat4 joints[55];
 
 attribute vec3 vPosition;
 attribute vec3 vNormal;

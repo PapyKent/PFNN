@@ -3,7 +3,7 @@
 uniform mat4 light_view;
 uniform mat4 light_proj;
 
-uniform mat4 joints[31];
+uniform mat4 joints[55];
 
 attribute vec3 vPosition;
 attribute vec4 vWeightVal;
