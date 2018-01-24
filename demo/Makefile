@@ -11,13 +11,14 @@ ifeq ($(findstring Darwin,$(PLATFORM)),Darwin)
 endif
 
 ifeq ($(findstring MINGW,$(PLATFORM)),MINGW)
-	LFLAGS = -lmingw32 -lopengl32 -lglew32 -lSDL2main -lSDL2 
+	LFLAGS = -lmingw32 -lopengl32 -lglew32 -lSDL2main -lSDL2
+	LDFLAGS = -I ./include
 	EXT = .exe
 endif
 
 pfnn: pfnn.cpp
-	g++ -std=gnu++11 -Wall -O3 -ffast-math $< $(LFLAGS) -g -o $@
-	g++ -DHIGH_QUALITY -std=gnu++11 -Wall -O3 -ffast-math $< $(LFLAGS) -g -o $@_hq
+	g++ -std=gnu++11 -Wall -O3 -ffast-math $< $(LFLAGS) -g -o $@ $(LDFLAGS) 
+	g++ -DHIGH_QUALITY -std=gnu++11 -Wall -O3 -ffast-math $< $(LFLAGS) -g -o $@_hq $(LDFLAGS)
   
 clean: pfnn$(EXT)
 	rm pfnn$(EXT)
