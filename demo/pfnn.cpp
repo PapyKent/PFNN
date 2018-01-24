@@ -12,6 +12,9 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/transform.hpp>
 
+//need to remove after debug
+#include <glm/ext.hpp>
+
 #include <sstream>
 #include <fstream>
 #include <iostream>
@@ -109,7 +112,8 @@ static Options* options = NULL;
 struct PFNN {
 
   //old pfnn enum { XDIM = 342, YDIM = 311, HDIM = 512 };
-  enum { XDIM = 516, YDIM = 527, HDIM = 512 };
+  //mixamo  enum { XDIM = 516, YDIM = 527, HDIM = 512 };
+  enum { XDIM = 372, YDIM = 311, HDIM = 512 };
   enum { MODE_CONSTANT, MODE_LINEAR, MODE_CUBIC };
 
   int mode;
@@ -278,7 +282,7 @@ struct PFNN {
         pindex_1 = (int)((P / (2*M_PI)) * 50);
         H0 = (W0[pindex_1].matrix() * Xp.matrix()).array() + b0[pindex_1]; ELU(H0);
         H1 = (W1[pindex_1].matrix() * H0.matrix()).array() + b1[pindex_1]; ELU(H1);
-        Yp = (W2[pindex_1].matrix() * H1.matrix()).array() + b2[pindex_1]; //this line = BUG
+        Yp = (W2[pindex_1].matrix() * H1.matrix()).array() + b2[pindex_1]; 
       break;
 
       case MODE_LINEAR:
@@ -736,10 +740,12 @@ static Shader* shader_character_shadow = NULL;
 struct Character {
 
   //old pfnn bvh hierarchy
-  //enum { JOINT_NUM = 31 };
+  enum { JOINT_NUM = 31 };
 
   enum { INJ_LINKS_NUM = 30 };
-  enum { JOINT_NUM = 55 };
+
+  //mixamo
+  //enum { JOINT_NUM = 55 };
 
   GLuint vbo, tbo;
   int ntri, nvtx;
@@ -766,7 +772,7 @@ struct Character {
 
   int joint_links_status[INJ_LINKS_NUM];
 
-  /* old pfnn bvh hierarchy
+  //old pfnn bvh hierarchy
   enum {
     JOINT_ROOT_L = 1,
     JOINT_HIP_L  = 2,
@@ -779,10 +785,10 @@ struct Character {
     JOINT_KNEE_R = 8,
     JOINT_HEEL_R = 9,
     JOINT_TOE_R  = 10
-  };*/
+  };
 
-
-  enum {
+  //mixamo
+  /*enum {
     JOINT_ROOT_L = 0,
     JOINT_HIP_L  = 52,
     JOINT_KNEE_L = 53,
@@ -794,7 +800,7 @@ struct Character {
     JOINT_KNEE_R = 49,
     JOINT_HEEL_R = 50,
     JOINT_TOE_R  = 51
-  };
+  };*/
 
 
   Character()
@@ -2641,6 +2647,70 @@ void injureCharacterBody(int index){
     character->joint_links_status[index] = 0;
 }
 
+/*
+void loadCharacterParents(){
+  character->joint_parents[0] = -1; //root
+
+  character->joint_parents[1] = 0; //spine
+  character->joint_parents[2] = 1; //spine 1
+  character->joint_parents[3] = 2; //spine2
+  character->joint_parents[4] = 3; //neck
+  character->joint_parents[5] = 4; //head
+  character->joint_parents[6] = 5; //headtop_end
+
+  character->joint_parents[7] = 5; //left eye
+  character->joint_parents[8] = 5; //right eye
+
+  character->joint_parents[9] = 4; //left shoulder
+  character->joint_parents[10] = 9; //left arm
+  character->joint_parents[11] = 10; //left forearm
+  character->joint_parents[12] = 11; //left hand
+  character->joint_parents[13] = 12; //left hand middle 1
+  character->joint_parents[14] = 13; //left hand middle 2
+  character->joint_parents[15] = 14; //left hand middle 3
+  character->joint_parents[16] = 12; //left hand thumb 1
+  character->joint_parents[17] = 16; //left hand thumb 2
+  character->joint_parents[18] = 17; //left hand thumb 3
+  character->joint_parents[19] = 12; //left hand index 1
+  character->joint_parents[20] = 19; //left hand index 2
+  character->joint_parents[21] = 20; //left hand index 3
+  character->joint_parents[22] = 12; //left hand ring 1
+  character->joint_parents[23] = 22; //left hand ring 2
+  character->joint_parents[24] = 23; //left hand ring 3
+  character->joint_parents[25] = 12; //left hand pinky 1
+  character->joint_parents[26] = 25; //left hand pinky 2
+  character->joint_parents[27] = 26; //left hand pinky 3
+
+  character->joint_parents[28] = 4; //right shoulder
+  character->joint_parents[29] = 29; //right arm
+  character->joint_parents[30] = 30; //right forearm
+  character->joint_parents[31] = 31; //right hand
+  character->joint_parents[32] = 31; //right hand middle 1
+  character->joint_parents[33] = 32; //right hand middle 2
+  character->joint_parents[34] = 33; //right hand middle 3
+  character->joint_parents[35] = 31; //right hand thumb 1
+  character->joint_parents[36] = 35; //right hand thumb 2
+  character->joint_parents[37] = 36; //right hand thumb 3
+  character->joint_parents[38] = 31; //right hand index 1
+  character->joint_parents[39] = 38; //right hand index 2
+  character->joint_parents[40] = 39; //right hand index 3
+  character->joint_parents[41] = 31; //right hand ring 1
+  character->joint_parents[42] = 41; //right hand ring 2
+  character->joint_parents[43] = 42; //right hand ring 3
+  character->joint_parents[44] = 31; //right hand pinky 1
+  character->joint_parents[45] = 44; //right hand pinky 2
+  character->joint_parents[46] = 45; //right hand pinky 3
+
+  character->joint_parents[47] = 0; //right up leg
+  character->joint_parents[48] = 47; //right leg
+  character->joint_parents[49] = 48; //right foot 
+  character->joint_parents[50] = 49; //right toe base
+
+  character->joint_parents[51] = 0; //left up leg
+  character->joint_parents[52] = 51; //left leg
+  character->joint_parents[53] = 52; //left foot 
+  character->joint_parents[54] = 53; //left toe base
+}*/
 
 int main(int argc, char **argv) {
 
@@ -2690,10 +2760,6 @@ int main(int argc, char **argv) {
     "./network/character_parents.bin",
     "./network/character_xforms.bin");
 
-  //refaire parents à la mano, besoin de modif les autres?
-
-  for (int i = 0; i < Character::JOINT_NUM; i++)
-    printf("parents de %d est %d\n", i, character->joint_parents[i]);
 
   trajectory = new Trajectory();
   ik = new IK();

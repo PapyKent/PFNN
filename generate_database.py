@@ -20,34 +20,16 @@ to_meters = 5.6444
 window = 60
 
 njoints = 31
-njoints_mixamo = 55
+#njoints_mixamo = 55
 
 """ Data """
 data_injuries = [
-    './data/injuries/Injured_Jog_LLA_extended_injuries', 
-    './data/injuries/Injured_Jog_RLA_extended_injuries', 
-    './data/injuries/Injured_Run_LLL_extended_injuries', 
-    './data/injuries/Injured_Run_RLL_extended_injuries', 
-    './data/injuries/Injured_Walk_LLL_extended_injuries', 
-    './data/injuries/Injured_Walk_LUA_extended_injuries', 
-    './data/injuries/Injured_Walk_LUL_extended_injuries', 
-    './data/injuries/Injured_Walk_RLL_extended_injuries', 
-    './data/injuries/Injured_Walk_RUA_extended_injuries',
-    './data/injuries/Injured_Walk_RUL_extended_injuries',        
+    './data/animations/LocomotionFlat01_000.bvh',      
         ]
 
 
 data_terrain = [
-    './data/injuries/Injured_Jog_LLA_extended.bvh', 
-    './data/injuries/Injured_Jog_RLA_extended.bvh', 
-    './data/injuries/Injured_Run_LLL_extended.bvh', 
-    './data/injuries/Injured_Run_RLL_extended.bvh', 
-    './data/injuries/Injured_Walk_LLL_extended.bvh', 
-    './data/injuries/Injured_Walk_LUA_extended.bvh', 
-    './data/injuries/Injured_Walk_LUL_extended.bvh', 
-    './data/injuries/Injured_Walk_RLL_extended.bvh', 
-    './data/injuries/Injured_Walk_RUA_extended.bvh',
-    './data/injuries/Injured_Walk_RUL_extended.bvh',    
+    './data/animations/LocomotionFlat01_000.bvh',  
         ]
 
 
@@ -142,7 +124,6 @@ data_terrain = [
 
 
 #data_terrain = ['./data/animations/LocomotionFlat01_000.bvh']
-
 """ Load Terrain Patches """
 
 patches_database = np.load('patches.npz')
@@ -160,10 +141,10 @@ def process_data(anim, phase, gait, injuries, type='flat'):
     
     """ Extract Forward Direction """
     #original pfnn bvh hierarchy
-    #sdr_l, sdr_r, hip_l, hip_r = 18, 25, 2, 7
+    sdr_l, sdr_r, hip_l, hip_r = 18, 25, 2, 7
     
     #for mixamo bvh hierarchy
-    sdr_l, sdr_r, hip_l, hip_r = 10, 29, 52, 48
+    #sdr_l, sdr_r, hip_l, hip_r = 10, 29, 52, 48
     
     across = (
         (global_positions[:,sdr_l] - global_positions[:,sdr_r]) + 
@@ -196,9 +177,9 @@ def process_data(anim, phase, gait, injuries, type='flat'):
     """ Foot Contacts """
     
     #original pfnn bvh hierarchy
-    #fid_l, fid_r = np.array([4,5]), np.array([9,10])
+    fid_l, fid_r = np.array([4,5]), np.array([9,10])
     #mixamo bvh
-    fid_l, fid_r = np.array([53,54]), np.array([49,50])
+    #fid_l, fid_r = np.array([53,54]), np.array([49,50])
     
     velfactor = np.array([0.02, 0.02])
     
@@ -305,10 +286,10 @@ def process_heights(anim, nsamples=10, type='flat'):
     """ Extract Forward Direction """
     
     #original pfnn bvh hierarchy
-    #sdr_l, sdr_r, hip_l, hip_r = 18, 25, 2, 7
+    sdr_l, sdr_r, hip_l, hip_r = 18, 25, 2, 7
     
     #for mixamo bvh hierarchy
-    sdr_l, sdr_r, hip_l, hip_r = 10, 29, 52, 48
+    #sdr_l, sdr_r, hip_l, hip_r = 10, 29, 52, 48
     
     
     across = (
@@ -329,10 +310,10 @@ def process_heights(anim, nsamples=10, type='flat'):
 
     """ Foot Contacts """
     #original pfnn bvh hierarchy
-    #fid_l, fid_r = np.array([4,5]), np.array([9,10])
+    fid_l, fid_r = np.array([4,5]), np.array([9,10])
     
     #for mixamo bvh hierarchy    
-    fid_l, fid_r = np.array([53,54]), np.array([49,50])
+    #fid_l, fid_r = np.array([53,54]), np.array([49,50])
     
     
     velfactor = np.array([0.02, 0.02])
@@ -595,10 +576,11 @@ for data in data_terrain:
            
             """ Reduce Heights in Input/Output to Match"""
             
-            xo_s, xo_e = ((window*2)//10)*10+1, ((window*2)//10)*10+njoints_mixamo*3+1
-            yo_s, yo_e = 8+(window//10)*4+1, 8+(window//10)*4+njoints_mixamo*3+1
+            xo_s, xo_e = ((window*2)//10)*10+1, ((window*2)//10)*10+njoints*3+1
+            yo_s, yo_e = 8+(window//10)*4+1, 8+(window//10)*4+njoints*3+1
+            
             Xh[:,xo_s:xo_e:3] -= hmean[...,np.newaxis]
-            Yh[:,yo_s:yo_e:3] -= hmean[...,np.newaxis]         
+            Yh[:,yo_s:yo_e:3] -= hmean[...,np.newaxis] 
             
             Xh = np.concatenate([Xh, h - hmean[...,np.newaxis]], axis=-1)
 
@@ -628,3 +610,4 @@ print(Xun.shape, Yun.shape, Pun.shape)
 print('Saving Database...')
 
 np.savez_compressed('database.npz', Xun=Xun, Yun=Yun, Pun=Pun)
+
