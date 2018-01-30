@@ -28,7 +28,7 @@ print(X.shape, Y.shape)
 
 Xmean, Xstd = X.mean(axis=0), X.std(axis=0)
 Ymean, Ystd = Y.mean(axis=0), Y.std(axis=0)
-
+    
 j = 31
 inj = 30
 #j2 = 55
@@ -39,7 +39,6 @@ Xstd[w*1:w* 2] = Xstd[w*1:w* 2].mean() # Trajectory Future Positions
 Xstd[w*2:w* 3] = Xstd[w*2:w* 3].mean() # Trajectory Past Directions
 Xstd[w*3:w* 4] = Xstd[w*3:w* 4].mean() # Trajectory Future Directions
 Xstd[w*4:w*10] = Xstd[w*4:w*10].mean() # Trajectory Gait
-
 
 """ Mask Out Unused Joints in Input """
 
@@ -67,9 +66,9 @@ mixamo_joint_weights = np.array([
 Xstd[w*10+j*3*0:w*10+j*3*1] = Xstd[w*10+j*3*0:w*10+j*3*1].mean() / (joint_weights * 0.1) # Pos
 Xstd[w*10+j*3*1:w*10+j*3*2] = Xstd[w*10+j*3*1:w*10+j*3*2].mean() / (joint_weights * 0.1) # Vel
 Xstd[w*10+j*3*2:w*10+j*3*2+inj] = Xstd[w*10+j*3*2:w*10+j*3*2+inj].mean() #/ (joint_weights * 0.1) # Inj
-Xstd[w*10+j*3*2+j:] = Xstd[w*10+j*3*2+j:].mean() # Terrain
-
-
+Xstd[w*10+j*3*2+inj:] = Xstd[w*10+j*3*2+inj:].mean() # Terrain
+    
+    
 Ystd[0:2] = Ystd[0:2].mean() # Translational Velocity
 Ystd[2:3] = Ystd[2:3].mean() # Rotational Velocity
 Ystd[3:4] = Ystd[3:4].mean() # Change in Phase
@@ -89,10 +88,11 @@ Ymean.astype(np.float32).tofile('./demo/network/pfnn/Ymean.bin')
 Xstd.astype(np.float32).tofile('./demo/network/pfnn/Xstd.bin')
 Ystd.astype(np.float32).tofile('./demo/network/pfnn/Ystd.bin')
 
-""" Normalize Data """
 
+""" Normalize Data """
 X = (X - Xmean) / Xstd
 Y = (Y - Ymean) / Ystd
+
 
 """ Phase Function Neural Network """
 
@@ -139,6 +139,8 @@ class PhaseFunctionedNetwork(Layer):
                 (y0-2.5*y1+2.0*y2-0.5*y3)*mu*mu + 
                 (-0.5*y0+0.5*y2)*mu +
                 (y1))
+            
+            
         
         W0 = cubic(self.W0.W[pindex_0], self.W0.W[pindex_1], self.W0.W[pindex_2], self.W0.W[pindex_3], Wamount)
         W1 = cubic(self.W1.W[pindex_0], self.W1.W[pindex_1], self.W1.W[pindex_2], self.W1.W[pindex_3], Wamount)
@@ -153,6 +155,7 @@ class PhaseFunctionedNetwork(Layer):
         H2 = self.activation(T.batched_dot(W1, self.dropout1(H1)) + b1)
         H3 =                 T.batched_dot(W2, self.dropout2(H2)) + b2
         
+       
         return H3
         
     def cost(self, input):
@@ -214,6 +217,7 @@ def save_network(network):
         b1 = cubic(b1n[pindex_0], b1n[pindex_1], b1n[pindex_2], b1n[pindex_3], pamount)
         b2 = cubic(b2n[pindex_0], b2n[pindex_1], b2n[pindex_2], b2n[pindex_3], pamount)
         
+        
         W0.astype(np.float32).tofile('./demo/network/pfnn/W0_%03i.bin' % i)
         W1.astype(np.float32).tofile('./demo/network/pfnn/W1_%03i.bin' % i)
         W2.astype(np.float32).tofile('./demo/network/pfnn/W2_%03i.bin' % i)
@@ -221,6 +225,9 @@ def save_network(network):
         b0.astype(np.float32).tofile('./demo/network/pfnn/b0_%03i.bin' % i)
         b1.astype(np.float32).tofile('./demo/network/pfnn/b1_%03i.bin' % i)
         b2.astype(np.float32).tofile('./demo/network/pfnn/b2_%03i.bin' % i)
+        
+        
+ 
         
      
         

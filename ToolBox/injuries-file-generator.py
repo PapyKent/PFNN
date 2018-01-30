@@ -9,8 +9,8 @@ import numpy
 
 
 
-file_name = "test_injuries"
-file_path= "./data/"
+file_name = "Injured_Idle_converted_extended_injuries"
+file_path= "../data/injuries/"
 
 
 correspondance_table_pfnn = {}
@@ -111,6 +111,7 @@ def write_file(matrix):
 
 
 matrix = export_data();
+
 
 write_file(matrix)  
 

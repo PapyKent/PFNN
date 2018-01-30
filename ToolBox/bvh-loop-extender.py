@@ -12,7 +12,7 @@ import numpy as np
 
 
 
-sys.path.append('../../motion')
+sys.path.append('../motion')
 
 import math as math
 import BVH as BVH
@@ -20,8 +20,8 @@ import Animation as Animation
 import Quaternions as Quaternions
 
 
-file_name = "mixamo"
-file_path= "./data/animations/"
+file_name = "Injured_Idle_converted"
+file_path= "./data/injuries/"
 file = file_path+file_name+".bvh"
 
 def loop_extender(ext_number, file):
@@ -47,7 +47,7 @@ def loop_extender(ext_number, file):
 
     new_anim = Animation.Animation(new_rotations, new_positions, anim.orients, anim.offsets, anim.parents)
 
-    BVH.save(file_path+"test.bvh", new_anim, names, frametime)
+    BVH.save(file_path+file_name+"_extended.bvh", new_anim, names, frametime)
     
     return;
 

@@ -47,8 +47,8 @@ enum {
   GAMEPAD_SHOULDER_R = 9,
   GAMEPAD_STICK_L_HORIZONTAL = 0,
   GAMEPAD_STICK_L_VERTICAL   = 1,
-  GAMEPAD_STICK_R_HORIZONTAL = 2,
-  GAMEPAD_STICK_R_VERTICAL   = 3
+  GAMEPAD_STICK_R_HORIZONTAL = 3, //2
+  GAMEPAD_STICK_R_VERTICAL   = 4
 };
 
 struct Options {
@@ -188,20 +188,19 @@ struct PFNN {
   }
 
   void load() {
-
+    
     load_weights(Xmean, XDIM, "./network/pfnn/Xmean.bin");
     load_weights(Xstd,  XDIM, "./network/pfnn/Xstd.bin");
     load_weights(Ymean, YDIM, "./network/pfnn/Ymean.bin");
     load_weights(Ystd,  YDIM, "./network/pfnn/Ystd.bin");
-
-
+    
     switch (mode) {
 
       case MODE_CONSTANT:
-
+        
         W0.resize(50); W1.resize(50); W2.resize(50);
         b0.resize(50); b1.resize(50); b2.resize(50);
-
+        
         for (int i = 0; i < 50; i++) {
           load_weights(W0[i], HDIM, XDIM, "./network/pfnn/W0_%03i.bin", i);
           load_weights(W1[i], HDIM, HDIM, "./network/pfnn/W1_%03i.bin", i);
@@ -210,7 +209,7 @@ struct PFNN {
           load_weights(b1[i], HDIM, "./network/pfnn/b1_%03i.bin", i);
           load_weights(b2[i], YDIM, "./network/pfnn/b2_%03i.bin", i);
         }
-      printf("%f \n", b1[0](0));
+
       break;
 
       case MODE_LINEAR:
@@ -275,7 +274,7 @@ struct PFNN {
     int pindex_0, pindex_1, pindex_2, pindex_3;
 
     Xp = (Xp - Xmean) / Xstd;
-
+    
     switch (mode) {
 
       case MODE_CONSTANT:
@@ -283,6 +282,7 @@ struct PFNN {
         H0 = (W0[pindex_1].matrix() * Xp.matrix()).array() + b0[pindex_1]; ELU(H0);
         H1 = (W1[pindex_1].matrix() * H0.matrix()).array() + b1[pindex_1]; ELU(H1);
         Yp = (W2[pindex_1].matrix() * H1.matrix()).array() + b2[pindex_1]; 
+
       break;
 
       case MODE_LINEAR:
@@ -1474,6 +1474,7 @@ static void pre_render() {
 
   camera->pitch = glm::clamp(camera->pitch + (y_move / 32768.0) * 0.03, M_PI/16, 2*M_PI/5);
   camera->yaw = camera->yaw + (x_move / 32768.0) * 0.03;
+  std::cout << x_move << std::endl;
 
   float zoom_i = SDL_JoystickGetButton(stick, GAMEPAD_SHOULDER_L) * 20.0;
   float zoom_o = SDL_JoystickGetButton(stick, GAMEPAD_SHOULDER_R) * 20.0;
@@ -1711,7 +1712,7 @@ static void pre_render() {
 
   clock_t time_start = clock();
 
-  //pfnn->predict(character->phase);
+  pfnn->predict(character->phase);
 
   clock_t time_end = clock();
 
@@ -2780,6 +2781,7 @@ int main(int argc, char **argv) {
   shader_character_shadow->load("./shaders/character_shadow.vs", "./shaders/character_shadow.fs");
 #endif
 
+
   heightmap = new Heightmap();
   areas = new Areas();
 
@@ -2787,7 +2789,6 @@ int main(int argc, char **argv) {
   //pfnn = new PFNN(PFNN::MODE_CUBIC);
   //pfnn = new PFNN(PFNN::MODE_LINEAR);
   pfnn->load();
-
   load_world0();
 
   /* Game Loop */

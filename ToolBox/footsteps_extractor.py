@@ -10,17 +10,17 @@ import numpy as np
 
 
 
-sys.path.append('../../motion')
+sys.path.append('../motion')
 
 import math as math
 import BVH as BVH
 import Animation as Animation
 
-file_name = "mixamo_moving"
-file_path= "./data/animations/"
+file_name = "Injured_Idle_converted_extended"
+file_path= "../data/injuries/"
 
 '''mixamo moving = 0.7, pfnn = 0.05'''
-treshold_value = 0.7
+treshold_value = 0.05
 
 def distance(position1, position2):
     distance = math.sqrt((position2[0]-position1[0])**2+(position2[1]-position1[1])**2+(position2[2]-position1[2])**2)

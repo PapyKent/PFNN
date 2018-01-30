@@ -1,9 +1,13 @@
 import numpy
 
 def main():
-    f = open('LocomotionFlat01_000_footsteps.txt')
-    p = open('test.phase','w')
-    p = open('test.phase','a')
+    
+    file_path = '../data/injuries/'
+    file_name = 'Injured_Idle_converted_extended'
+    
+    f = open(file_path+file_name+'_footsteps.txt')
+    p = open(file_path+file_name+'.phase','w') #output file name
+    p = open(file_path+file_name+'.phase','a')
     lines = f.readlines()
     i = 1;
     first = lines[0].split(" ")
