@@ -16,7 +16,7 @@ import math as math
 import BVH as BVH
 import Animation as Animation
 
-file_name = "Injured_Idle_converted_extended"
+file_name = "Injured_Walk_RUL_extended_converted"
 file_path= "../data/injuries/"
 
 '''mixamo moving = 0.7, pfnn = 0.05'''

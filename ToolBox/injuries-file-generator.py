@@ -9,7 +9,7 @@ import numpy
 
 
 
-file_name = "Injured_Idle_converted_extended_injuries"
+file_name = "Injured_Walk_RUL_extended_converted_injuries"
 file_path= "../data/injuries/"
 
 

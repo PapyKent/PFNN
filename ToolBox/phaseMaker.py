@@ -3,7 +3,7 @@ import numpy
 def main():
     
     file_path = '../data/injuries/'
-    file_name = 'Injured_Idle_converted_extended'
+    file_name = 'Injured_Walk_RUL_extended_converted'
     
     f = open(file_path+file_name+'_footsteps.txt')
     p = open(file_path+file_name+'.phase','w') #output file name
