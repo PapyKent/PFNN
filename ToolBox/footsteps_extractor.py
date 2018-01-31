@@ -64,7 +64,7 @@ while i < frames_number-1:
         LFd = distance(global_positions[i-1][left_foot_id], global_positions[i+1][left_foot_id])
         LTd = distance(global_positions[i-1][left_toe_id], global_positions[i+1][left_toe_id])
         if treshold_check(LFd, LTd):
-            file_object.write(str(rf)+" "+str(i)+"\n")
+            file_object.write(str(i)+"\n")
             switch = False
             i+=5
     else:
@@ -72,6 +72,7 @@ while i < frames_number-1:
         RTd = distance(global_positions[i-1][right_toe_id], global_positions[i+1][right_toe_id])
         if treshold_check(RFd, RTd):
             rf = i
+            file_object.write(str(rf)+" ")
             switch = True
             i+=5
             
