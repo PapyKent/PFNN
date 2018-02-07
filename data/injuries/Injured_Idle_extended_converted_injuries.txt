@@ -1,0 +1,2 @@
+frames:1121
+0-1121 RightUpLeg-RightLeg[10];
