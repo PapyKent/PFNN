@@ -1,0 +1,2 @@
+frames:15000
+0-15000 LeftForeArm-LeftHand[0];
