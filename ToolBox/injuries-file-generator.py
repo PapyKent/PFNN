@@ -9,7 +9,7 @@ import numpy
 
 
 
-file_name = "Injured_Walk_RUL_extended_converted_injuries"
+file_name = "Injured_Run_LLL_extended_converted_injuries"
 file_path= "../data/injuries/"
 
 
@@ -79,7 +79,9 @@ def export_data():
         
             ending_frame = int(ending_frame[0])
             if ending_frame == frames_number :
-                ending_frame = frames_number-1
+                ending_frame = frames_number
+                
+                
             for i in range(0, len(values)):
                 if ids[i] in correspondance_table_pfnn.keys():
                     matrix[starting_frame-1:ending_frame:, correspondance_table_pfnn[ids[i]]] = values[i]
