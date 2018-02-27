@@ -1474,7 +1474,6 @@ static void pre_render() {
 
   camera->pitch = glm::clamp(camera->pitch + (y_move / 32768.0) * 0.03, M_PI/16, 2*M_PI/5);
   camera->yaw = camera->yaw + (x_move / 32768.0) * 0.03;
-  std::cout << x_move << std::endl;
 
   float zoom_i = SDL_JoystickGetButton(stick, GAMEPAD_SHOULDER_L) * 20.0;
   float zoom_o = SDL_JoystickGetButton(stick, GAMEPAD_SHOULDER_R) * 20.0;
@@ -1689,14 +1688,14 @@ static void pre_render() {
   }
 
 
-  /*Injuries status   TODO*/
+  /* Injuries status   */
    for(int i = 0; i < Character::INJ_LINKS_NUM; i++){
     int o = (((Trajectory::LENGTH)/10)*10);
     pfnn->Xp(o+(Character::JOINT_NUM*3*2)+i) = character->joint_links_status[i];
    }
 
 
-  /* Input Trajectory Heights TODO*/
+  /* Input Trajectory Heights */
   for (int i = 0; i < Trajectory::LENGTH; i += 10) {
     int o = (((Trajectory::LENGTH)/10)*10)+Character::JOINT_NUM*3*2+Character::INJ_LINKS_NUM;
     int w = (Trajectory::LENGTH)/10;
@@ -2640,12 +2639,23 @@ void render() {
 
 }
 
+void printBodyStatus(){
+  for(int i = 0; i < Character::INJ_LINKS_NUM; i++){
+    printf(" %d",character->joint_links_status[i]);
+
+  }
+  printf("\n");
+
+}
+
 
 void injureCharacterBody(int index){
   character->joint_links_status[index]+= 1;
 
-  if(character->joint_links_status[index] >= 10)
+  if(character->joint_links_status[index] > 10)
     character->joint_links_status[index] = 0;
+
+  printBodyStatus();
 }
 
 /*
@@ -2712,6 +2722,9 @@ void loadCharacterParents(){
   character->joint_parents[53] = 52; //left foot 
   character->joint_parents[54] = 53; //left toe base
 }*/
+
+
+
 
 int main(int argc, char **argv) {
 
@@ -2785,9 +2798,9 @@ int main(int argc, char **argv) {
   heightmap = new Heightmap();
   areas = new Areas();
 
-  pfnn = new PFNN(PFNN::MODE_CONSTANT);
+  //pfnn = new PFNN(PFNN::MODE_CONSTANT);
   //pfnn = new PFNN(PFNN::MODE_CUBIC);
-  //pfnn = new PFNN(PFNN::MODE_LINEAR);
+  pfnn = new PFNN(PFNN::MODE_LINEAR);
   pfnn->load();
   load_world0();
 
@@ -2826,11 +2839,12 @@ int main(int argc, char **argv) {
           case SDLK_4: load_world3(); break;
           case SDLK_5: load_world4(); break;
           case SDLK_6: load_world5(); break;
+          case SDLK_0: printBodyStatus(); break;
 
           case SDLK_a: injureCharacterBody(0); break; //Hips-LHipJoint
           case SDLK_z: injureCharacterBody(1); break; //LHipJoint-LeftUpLeg
           case SDLK_e: injureCharacterBody(2); break; //LeftUpLeg-LeftLeg
-          case SDLK_r: injureCharacterBody(3); break; //LeftLeg-LeftFoot
+          case SDLK_r: injureCharacterBody(3); break; //LeftLeg-LeftFoot -> LeftUpLeg-LeftLeg
           case SDLK_t: injureCharacterBody(4); break; //LeftFoot-LeftToeBase
 
           case SDLK_y: injureCharacterBody(5); break; //Hips-RHipJoint

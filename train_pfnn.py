@@ -65,7 +65,7 @@ mixamo_joint_weights = np.array([
 
 Xstd[w*10+j*3*0:w*10+j*3*1] = Xstd[w*10+j*3*0:w*10+j*3*1].mean() / (joint_weights * 0.1) # Pos
 Xstd[w*10+j*3*1:w*10+j*3*2] = Xstd[w*10+j*3*1:w*10+j*3*2].mean() / (joint_weights * 0.1) # Vel
-Xstd[w*10+j*3*2:w*10+j*3*2+inj] = Xstd[w*10+j*3*2:w*10+j*3*2+inj].mean() #/ (joint_weights * 0.1) # Inj
+Xstd[w*10+j*3*2:w*10+j*3*2+inj] = Xstd[w*10+j*3*2:w*10+j*3*2+inj].mean() #/ ( 0.1) # Inj
 Xstd[w*10+j*3*2+inj:] = Xstd[w*10+j*3*2+inj:].mean() # Terrain
     
     

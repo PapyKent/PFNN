@@ -23,13 +23,27 @@ njoints = 31
 #njoints_mixamo = 55
 
 """ Data """
-data_injuries = [
-    './data/animations/LocomotionFlat01_000.bvh',      
-        ]
 
 
 data_terrain = [
-    './data/animations/LocomotionFlat01_000.bvh',  
+    './data/injuries/Injured_Walk_RUL_extended_converted.bvh',
+    './data/injuries/Injured_Walk_RUA_extended_converted.bvh',
+
+    './data/injuries/Injured_Walk_LLL_extended_converted.bvh',
+    './data/injuries/Injured_Walk_LUA_extended_converted.bvh',
+    './data/injuries/Injured_Walk_LUL_extended_converted.bvh',
+    './data/injuries/Injured_Walk_RLL_extended_converted.bvh',
+    
+    './data/injuries/Injured_Idle_extended_converted.bvh',
+    
+    
+    
+    './data/animations/LocomotionFlat01_000.bvh',
+    './data/animations/LocomotionFlat02_000.bvh',
+    './data/animations/LocomotionFlat03_000.bvh',
+    './data/animations/LocomotionFlat04_000.bvh',
+
+   
         ]
 
 
@@ -209,7 +223,6 @@ def process_data(anim, phase, gait, injuries, type='flat'):
     """ Start Windows """
     Pc, Xc, Yc = [], [], []
 
-    
     for i in range(window, len(anim)-window-1, 1):
         
         rootposs = root_rotation[i:i+1,0] * (global_positions[i-window:i+window:10,0] - global_positions[i:i+1,0])
@@ -229,9 +242,7 @@ def process_data(anim, phase, gait, injuries, type='flat'):
                 local_velocities[i-1].ravel(), # Joint Vel
                 injuries[i-1].ravel() #Joints Link's status
                 ]))
-    
-        
-       
+  
         
         rootposs_next = root_rotation[i+1:i+2,0] * (global_positions[i+1:i+window+1:10,0] - global_positions[i+1:i+2,0])
         rootdirs_next = root_rotation[i+1:i+2,0] * forward[i+1:i+window+1:10]   
@@ -522,13 +533,12 @@ for data in data_terrain:
     anim.positions *= to_meters
     anim = anim[::2]
     
-    
     """ Load Phase / Gait / Injuries"""
     
     injuries = np.loadtxt(data.replace('.bvh', '_injuries'))
     phase = np.loadtxt(data.replace('.bvh', '.phase'))[::2]
     gait = np.loadtxt(data.replace('.bvh', '.gait'))[::2]
-
+ 
     """ Merge Jog / Run and Crouch / Crawl """
      
     gait = np.concatenate([
@@ -543,16 +553,14 @@ for data in data_terrain:
     """ Preprocess Data """
     
     Pc, Xc, Yc = process_data(anim, phase, gait, injuries, type=type)
-
- 
-    
+        
     with open(data.replace('.bvh', '_footsteps.txt'), 'r') as f:
         footsteps = f.readlines()
     
     """ For each Locomotion Cycle fit Terrains """
     
     for li in range(len(footsteps)-1):
-       
+        print('locomotion %i/%i' %(li ,len(footsteps)-1))
         curr, next = footsteps[li+0].split(' '), footsteps[li+1].split(' ')
         
         """ Ignore Cycles marked with '*' or not in range """
@@ -580,7 +588,7 @@ for data in data_terrain:
             yo_s, yo_e = 8+(window//10)*4+1, 8+(window//10)*4+njoints*3+1
             
             Xh[:,xo_s:xo_e:3] -= hmean[...,np.newaxis]
-            Yh[:,yo_s:yo_e:3] -= hmean[...,np.newaxis] 
+            Yh[:,yo_s:yo_e:3] -= hmean[...,np.newaxis]            
             
             Xh = np.concatenate([Xh, h - hmean[...,np.newaxis]], axis=-1)
 
@@ -610,4 +618,3 @@ print(Xun.shape, Yun.shape, Pun.shape)
 print('Saving Database...')
 
 np.savez_compressed('database.npz', Xun=Xun, Yun=Yun, Pun=Pun)
-

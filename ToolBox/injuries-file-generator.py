@@ -78,8 +78,6 @@ def export_data():
                 starting_frame = 1
         
             ending_frame = int(ending_frame[0])
-            if ending_frame == frames_number :
-                ending_frame = frames_number
                 
                 
             for i in range(0, len(values)):
